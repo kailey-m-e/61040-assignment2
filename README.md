@@ -110,7 +110,7 @@ I chose to augment my Wishlist concept with AI, such that an LLM will recommend 
 
 ### UI Sketch
 
-![UI Sketch](../61040-assignment3/assets/UserInteractionSketch.png)
+![UI Sketch](../assets/UserInteractionSketch.png)
 
 ### User Journey
 
