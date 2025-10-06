@@ -1,182 +1,230 @@
-# DayPlanner 
-A simple day planner. This implementation focuses on the core concept of organizing activities for a single day with both manual and AI-assisted scheduling.
+# Assignment 3: An AI-Augmented Concept
 
-## Concept: DayPlanner
+## Instructions
 
-**Purpose**: Help you organize activities for a single day  
-**Principle**: You can add activities one at a time, assign them to times, and then observe the completed schedule
+To run all test cases:
 
-### Core State
-- **Activities**: Set of activities with title, duration, and optional startTime
-- **Assignments**: Set of activity-to-time assignments
-- **Time System**: All times in half-hour slots starting at midnight (0 = 12:00 AM, 13 = 6:30 AM)
-
-### Core Actions
-- `addActivity(title: string, duration: number): Activity`
-- `removeActivity(activity: Activity)`
-- `assignActivity(activity: Activity, startTime: number)`
-- `unassignActivity(activity: Activity)`
-- `requestAssignmentsFromLLM()` - AI-assisted scheduling with hardwired preferences
-
-## Prerequisites
-
-- **Node.js** (version 14 or higher)
-- **TypeScript** (will be installed automatically)
-- **Google Gemini API Key** (free at [Google AI Studio](https://makersuite.google.com/app/apikey))
-
-## Quick Setup
-
-### 0. Clone the repo locally and navigate to it
-```cd intro-gemini-schedule```
-
-### 1. Install Dependencies
-
-```bash
-npm install
-```
-
-### 2. Add Your API Key
-
-**Why use a template?** The `config.json` file contains your private API key and should never be committed to version control. The template approach lets you:
-- Keep the template file in git (safe to share)
-- Create your own `config.json` locally (keeps your API key private)
-- Easily set up the project on any machine
-
-**Step 1:** Copy the template file:
-```bash
-cp config.json.template config.json
-```
-
-**Step 2:** Edit `config.json` and add your API key:
-```json
-{
-  "apiKey": "YOUR_GEMINI_API_KEY_HERE"
-}
-```
-
-**To get your API key:**
-1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Sign in with your Google account
-3. Click "Create API Key"
-4. Copy the key and paste it into `config.json` (replacing `YOUR_GEMINI_API_KEY_HERE`)
-
-### 3. Run the Application
-
-**Run all test cases:**
 ```bash
 npm start
 ```
 
-**Run specific test cases:**
-```bash
-npm run manual    # Manual scheduling only
-npm run llm       # LLM-assisted scheduling only
-npm run mixed     # Mixed manual + LLM scheduling
-```
-
-## File Structure
+File structure:
 
 ```
-dayplanner/
-├── package.json              # Dependencies and scripts
-├── tsconfig.json             # TypeScript configuration
-├── config.json               # Your Gemini API key
-├── dayplanner-types.ts       # Core type definitions
-├── dayplanner.ts             # DayPlanner class implementation
-├── dayplanner-llm.ts         # LLM integration
-├── dayplanner-tests.ts       # Test cases and examples
-├── dist/                     # Compiled JavaScript output
-└── README.md                 # This file
+├── package.json            # Dependencies and scripts
+├── tsconfig.json           # TypeScript configuration
+├── config.json             # Your Gemini API key
+├── wishlist.ts             # Wishlist class implementation
+├── wishlist-tests.ts       # Wishlist test cases
+├── dist/                   # Compiled JavaScript output
+├── README                  # This file - Wishlist concept spec & assignment answers
 ```
 
-## Test Cases
+## Concept Selection & Fit for AI Augmentation
 
-The application includes three comprehensive test cases:
+I chose to augment my Wishlist concept with AI, such that an LLM will recommend additional dream destinations based on a user's current wishlist. LLM's have been used as a recommendation tool for years because they are exceptional at finding patterns in user data and then extrapolating from those patterns in order to brainstorm additional ideas, so I thought this augmentation would be the perfect way to assist users in filling in their wishlists and further excite them to travel.
 
-### 1. Manual Scheduling
-Demonstrates adding activities and manually assigning them to time slots:
+## Concept Specification
 
-```typescript
-const planner = new DayPlanner();
-const breakfast = planner.addActivity('Breakfast', 1); // 30 minutes
-planner.assignActivity(breakfast, 14); // 7:00 AM
-```
+### Wishlist: Original Version
 
-### 2. LLM-Assisted Scheduling
-Shows AI-powered scheduling with hardwired preferences:
+**concept** Wishlist [User]
 
-```typescript
-const planner = new DayPlanner();
-planner.addActivity('Morning Jog', 2);
-planner.addActivity('Math Homework', 4);
-await llm.requestAssignmentsFromLLM(planner);
-```
+**purpose** keep track of future dream destinations
 
-### 3. Mixed Scheduling
-Combines manual assignments with AI assistance for remaining activities.
+**principle** after a wishlist is created for a user, the user can add places that they want to travel to, and then remove places that they've already been or no longer want to go
 
-## Sample Output
+**state**
 
-```
-📅 Daily Schedule
-==================
-7:00 AM - Breakfast (30 min)
-8:00 AM - Morning Workout (1 hours)
-10:00 AM - Study Session (1.5 hours)
-1:00 PM - Lunch (30 min)
-3:00 PM - Team Meeting (1 hours)
-7:00 PM - Dinner (30 min)
-9:00 PM - Evening Reading (1 hours)
+&nbsp; a set of Wishlists with \
+&nbsp;&nbsp;&nbsp; a creator User \
+&nbsp;&nbsp;&nbsp; a set of Places
 
-📋 Unassigned Activities
-========================
-All activities are assigned!
-```
+&nbsp; a set of Places with \
+&nbsp;&nbsp;&nbsp; a city String \
+&nbsp;&nbsp;&nbsp; a region String \
+&nbsp;&nbsp;&nbsp; a country String
 
-## Key Features
+**actions**
 
-- **Simple State Management**: Activities and assignments stored in memory
-- **Flexible Time System**: Half-hour slots from midnight (0-47)
-- **Query-Based Display**: Schedule generated on-demand, not stored sorted
-- **AI Integration**: Hardwired preferences in LLM prompt (no external hints)
-- **Conflict Detection**: Prevents overlapping activities
-- **Clean Architecture**: First principles implementation with no legacy code
+&nbsp; create(user: User): (wishlist: Wishlist) \
+&nbsp;&nbsp;&nbsp; **requires** user doesn't exist in the set of wishlists \
+&nbsp;&nbsp;&nbsp; **effects** makes and returns a new wishlist asosciated with the given user and an empty set of places
 
-## LLM Preferences (Hardwired)
+&nbsp; addPlace(wishlist: Wishlist, city: String, region: String, country: String): (place: Place) \
+&nbsp;&nbsp;&nbsp; **requires** city, region, country is an existing location, and place with given city, region, and country doesn't exist in wishlist's set of places \
+&nbsp;&nbsp;&nbsp; **effects** adds new place associated with given city, region, and country to wishlist's set of userPlaces and returns place
 
-The AI uses these built-in preferences:
-- Exercise activities: Morning (6:00 AM - 10:00 AM)
-- Study/Classes: Focused hours (9:00 AM - 5:00 PM)
-- Meals: Regular intervals (breakfast 7-9 AM, lunch 12-1 PM, dinner 6-8 PM)
-- Social/Relaxation: Evenings (6:00 PM - 10:00 PM)
-- Avoid: Demanding activities after 10:00 PM
+&nbsp; removePlace(wishlist: Wishlist, place: Place) \
+&nbsp;&nbsp;&nbsp; **requires** place exists in the wishlist's set of places \
+&nbsp;&nbsp;&nbsp; **effects** removes place from the wishlist's set of places
 
-## Troubleshooting
+### Wishlist: AI-Augmented Version
 
-### "Could not load config.json"
-- Ensure `config.json` exists with your API key
-- Check JSON format is correct
+**concept** Wishlist [User]
 
-### "Error calling Gemini API"
-- Verify API key is correct
-- Check internet connection
-- Ensure API access is enabled in Google AI Studio
+**purpose** keep track of future dream destinations
 
-### Build Issues
-- Use `npm run build` to compile TypeScript
-- Check that all dependencies are installed with `npm install`
+**principle** after a wishlist is created for a user, the user can add places that they want to travel to, and then remove places that they've already been or no longer want to go; an LLM recommends additional wishlist destinations to the user based off of places in their current wishlist, which can then be accepted or rejected by the user (*not implemented in this assignment)
 
-## Next Steps
+**state**
 
-Try extending the DayPlanner:
-- Add weekly scheduling
-- Implement activity categories
-- Add location information
-- Create a web interface
-- Add conflict resolution strategies
-- Implement recurring activities
+&nbsp; a set of Wishlists with \
+&nbsp;&nbsp;&nbsp; a creator User \
+&nbsp;&nbsp;&nbsp; a userPlaces set of Places \
+&nbsp;&nbsp;&nbsp; a recommendedPlaces set of Places \
+&nbsp;&nbsp;&nbsp; a numberPlacesToRecommend number
 
-## Resources
+&nbsp; a set of Places with \
+&nbsp;&nbsp;&nbsp; a city String \
+&nbsp;&nbsp;&nbsp; a region String \
+&nbsp;&nbsp;&nbsp; a country String
 
-- [Google Generative AI Documentation](https://ai.google.dev/docs)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+**actions**
+
+&nbsp; create(user: User): (wishlist: Wishlist) \
+&nbsp;&nbsp;&nbsp; **requires** user doesn't exist in the set of wishlists \
+&nbsp;&nbsp;&nbsp; **effects** makes and returns a new wishlist asosciated with the given user; an empty set of userPlaces and recommendedPlaces; and a numberPlacesToRecommend set to 6
+
+<!-- &nbsp; editVisibility(wishlist: Wishlist, private: Flag): (wishlist: Wishlist) \
+&nbsp;&nbsp;&nbsp; **effects** update the wishlist's private flag to the given setting -->
+
+&nbsp; addPlace(wishlist: Wishlist, city: String, region: String, country: String): (place: Place) \
+&nbsp;&nbsp;&nbsp; **requires** city, region, country is an existing location, and place with given city, region, and country doesn't exist in wishlist's set of userPlaces \
+&nbsp;&nbsp;&nbsp; **effects** adds new place associated with given city, region, and country to wishlist's set of userPlaces and returns place
+
+&nbsp; removePlace(wishlist: Wishlist, place: Place) \
+&nbsp;&nbsp;&nbsp; **requires** place exists in the wishlist's set of userPlaces \
+&nbsp;&nbsp;&nbsp; **effects** removes place from the wishlist's set of userPlaces
+
+<!-- &nbsp; rejectRecommendation(wishlist: Wishlist, place: Place) \
+&nbsp;&nbsp;&nbsp; **requires** place exists in the wishlist's set of userPlaces \
+&nbsp;&nbsp;&nbsp; **effects** removes place from the wishlist's set of userPlaces -->
+
+&nbsp; async recommendPlaces(llm: GeminiLLM) \
+&nbsp;&nbsp;&nbsp; **requires** userPlaces is nonempty
+&nbsp;&nbsp;&nbsp; **effects** uses llm to create and return a (numberPlacesToRecommend)-length list of recommended places based on userPlaces
+
+
+## User Interaction
+
+### UI Sketch
+
+![UI Sketch](../assets/UISketch.png)
+
+### User Journey
+
+A user recently got her passport and is excited about all the possibilities for future travels, but she only has a few bucket list destinations in mind. She opens up the Away app and navigates to the Wishlist page, which is currently empty. She begins typing Amsterdam in the search bar, waits until the correct destination pop up, and clicks to add it to her wishlist. After also adding Copenhagen, she's stuck. However, she sees that LLM-generated recommendations, of destinations that she may want to visit based on her current wishlist, have appeared below the search bar. She decides that she's interested in the first recommendation, Lisbon, so she clicks the check mark on the right side of Lisbon's button, which adds it to her wish list. This causes the recommendations to regenerate with the user's updated wishlist, and one of the buttons now suggests Paris. She clicks on Paris' X mark because she doesn't like escargot, causing the recommendations to regenerate again; she repeats this process a few more times, fleshing out her wishlist to 5 locations. The user is satisfied with the LLM's assistance in helping her dream up future travel plans, and she begins looking at flight options online to prepare for her first big trip abroad.
+
+## Test Cases & Prompts
+
+**Initial Prompt**:
+
+    return `You are a helpful AI travel assistant. Please recommend ${this.numberPlacesToRecommend} new (not currently in the wishlist) destinations for the user based on their current wishlist locations:
+    ${this.toString("User")}.
+
+    Return your respones as a JSON object with this exact structure:
+    {
+        "places": [
+            {
+                "city": "full city name",
+                "region": "full region name (full state name if in the United States)",
+                "country": "full country name"
+            }
+        ]
+    }
+
+    Return ONLY the JSON object, no additional text.`;
+
+### Test Case 1
+
+**Prompt Variant #1**:
+
+    `You are a helpful AI travel assistant. Please recommend ${this.numberPlacesToRecommend} new (not currently in the wishlist) destinations for the user based on their current wishlist locations:
+    ${this.toString("User")}.
+
+    Return your recommendations as a JSON object with this exact structure, and ensure that all names are in their unabbreviated, most commonly used forms:
+    {
+        "places": [
+            {
+                "city": "city name",
+                "region": "region name",
+                "country": "country name"
+            }
+        ]
+    }
+
+    Return ONLY the JSON object, no additional text.`;
+
+**Reflection**:
+For my first test case, I experimented with LLM recommendations after adding and then removing popular tourist cities from the wishlist. I first realized that some of the region names seemed overly official/verbose and not the names commonly used, so I updated the prompting instructions for the city, region, and country names, and also specified that the region and country names should be the ones that are "most commonly used," which ended up working. For example, Lisbon was initially categorized as being in the region called "Lisbon Region", but then just the region called "Lisbon." However, the issue remained that the LLM was focusing too much on recommending cities of cultural similarity to the user's current wishlist, without considering a wider range of global destinations.
+
+### Test Case 2
+
+**Prompt Variant #2**:
+
+    `You are a helpful AI travel assistant whose task is to recommend ${this.numberPlacesToRecommend} new (not currently in the wishlist) trip locations for a user based on the current dream destinations on their wishlist:
+
+    ${this.toString("User")}.
+
+    When creating recommendations for the user, be sure to consider cities across the entire globe that the user would enjoy visiting: don't make all recommendations based ONLY on proximity, culture, or language, without also considering the alignment of potential new locations' many travel factors (scenery, feel/vibes,
+    attractions, cuisine, and more) with the current wishlist destinations.
+
+    For instance, if the majority of the wishlist locations are in a country with a given ethnic majority and primary language, do not only recommend cities in countries with similar demographics.
+
+    However, recommended destinations should still reflect the commonalities of the current wishlist locations.
+
+    Return your recommendations as a JSON object with this exact structure, and ensure that all names are in their unabbreviated, most commonly used forms:
+    {
+        "places": [
+            {
+                "city": "city name",
+                "region": "region name",
+                "country": "country name"
+            }
+        ]
+    }
+
+    Return ONLY the JSON object, no additional text.`;
+
+**Reflection**:
+For my second test case, I assessed the LLM's ability to create some diverse recommendations, even if the user only inputted popular cities in the northeast of the United States to their wishlist. The problem was that nearly every city recommended by the LLM was in the United States or a predominantly white, English-speaking country in Europe, even though similar locations existed around the globe that the user would likely enjoy visiting. Thus, I added a blurb to the prompt describing how the LLM shouldn't limit its recommendations to locations with a specific demographic, while still allowing the model to analyze commonalities. This resulted in a more satisfying array of locations, but I was unsure if the model had strayed too far from its original goal and was no longer picking up on commonalities among the user's wishlist locations.
+
+### Test Case 3
+
+**Prompt Variant #3**:
+
+    `You are a helpful AI travel assistant whose task is to recommend ${this.numberPlacesToRecommend} new (not currently in the wishlist) trip locations for a user based on the current dream destinations on their wishlist:
+
+    ${this.toString("User")}.
+
+    When creating recommendations for the user, be sure to consider cities/places across the entire globe that the user would enjoy visiting: don't make all recommendations based ONLY on proximity, culture, or language, without also considering the alignment of potential new locations' many travel factors (scenery/nature, feel/vibes, attractions/activities, cuisine, and more) with the current wishlist destinations.
+
+    For instance, if the majority of the wishlist locations are in a country with a given ethnic majority and primary language, do not only recommend cities in countries with similar demographics.
+
+    However, recommended destinations should still reflect the commonalities of the current wishlist locations.
+
+    Return your recommendations as a JSON object with this exact structure; ensure that all names are in their unabbreviated, most commonly used forms, and that a location is specified with the most accurate city, region, and country possible:
+    {
+        "places": [
+            {
+                "city": "city name",
+                "region": "region name",
+                "country": "country name"
+            }
+        ]
+    }
+
+    Return ONLY the JSON object, no additional text.`;
+
+**Reflection**:
+For my third test case, I experimented with the capability of the LLM to create recommendations from a wishlist of waterfall destinations with at first only three locations, and then one waterfall and one natural wonder. While the LLM recommendations successfully reflected the waterfall and nature/natural park themes of the the wishlist each time, I realized as I was adding wishlist items and reading the recommendations that places like waterfalls and natural parks do not quite fit into the usual framework of a location specified with a city, region, and country. Thus, I updated the prompt to more accurately reflect the variety of destinations that may be given, and I included an explicit instruction to fit each location into the city, country, region framework as accurately as possible in an attempt to avoid hallucinations or inconsistencies. However, the issue remains that, especially with a category like national parks that are more rare across the world, there's a tradeoff between recommending potentially closer, similar locations that the user would be more likely to visit, versus farther, highly-rated gems.
+
+
+## Validators
+
+One plausible issue is that the the LLM recommends a location that already exists in the wishlist, which would be redundant and undesirable. I checked for this by iterating over the recommended wishlist items and comparing each to all of the current wishlist items, in order to ensure that no duplicates existed.
+
+Additionally, the LLM could mistakenly recommend the same location twice, a confusing and unhelpful outcome for the user. In order to validate this, I compared each wishlist item to every other wishlist item, checking that no two were the same.
+
+Finally, another plausible issue is that the LLM recommends too many or too few locations, leading to UI issues later on. Thus, I checked the length of the LLM's list of recommended places to ensure the right number of recommendations were made.
